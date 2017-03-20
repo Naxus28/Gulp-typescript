@@ -1,0 +1,19 @@
+{
+  "name": "typescript-gulp-seed",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gabriel Ferraz <gabrielferraz27@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^14.1.0",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.1.6",
+    "tsify": "^3.0.1",
+    "typescript": "^2.2.1",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}

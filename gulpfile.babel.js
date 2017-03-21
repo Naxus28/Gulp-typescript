@@ -1,16 +1,19 @@
 const gulp = require("gulp");
       plugins = require('gulp-load-plugins')(),
       browserify = require("browserify"),
+      browserSync = require('browser-sync'),
+      runSequence = require('run-sequence'),
       source = require('vinyl-source-stream'),
       tsify = require("tsify"),
       buffer = require('vinyl-buffer'),
       paths = {
         html: {
-          dist: ['/dist/index.html'],
+          dist: ['dist/index.html'],
           src : ['src/*.html']
         },
-        js: {
-          dist: '/dist/js'
+        ts: {
+          dist: 'dist/js',
+          src: 'src/main.ts'
         }
       };
 
@@ -23,11 +26,11 @@ gulp.task('html', () => {
 // injects script tag into HTML
 gulp.task('inject', ['browserify'], () => {
   let injectOptions = { addRootSlash: false, ignorePath: './dist', relative: true };
-  let jsSource = gulp.src(paths.js.dist, { read: false });
+  let tsSource = gulp.src(paths.ts.dist, { read: false });
   let targetHtml = paths.html.dist;
 
   return gulp.src(targetHtml)
-    .pipe(plugins.inject(jsSource, injectOptions))
+    .pipe(plugins.inject(tsSource, injectOptions))
     .pipe(gulp.dest('dist'));
 });
 
@@ -58,8 +61,30 @@ gulp.task('browserify', () => {
     .pipe(gulp.dest('dist'));
 });
 
+// watch
+gulp.task('watch', () => {
+   console.log('paths.html.src: ', paths.html.src) 
+   console.log('paths.ts.src: ', paths.ts.src) 
+  gulp.watch(paths.html.src, () => runSequence('html', 'inject', 'reload'));
+  gulp.watch(paths.ts.src, () => runSequence('browserify', 'reload'));
+});
+
+// reload server
+gulp.task('reload', () => browserSync.reload());
+
+//initialize server
+let browserSyncInit = () => {
+  browserSync({
+    server: {
+      baseDir: './dist'
+    }
+  });
+};
+
 // default task--optionally we could pass the browserify task as a function to this task. i.e. gulp.task('default', ['copy-html'], function() { // task goes here } );
-gulp.task('default', ['html', 'browserify', 'inject']);
+gulp.task('build', ['html', 'browserify', 'inject']);
+
+gulp.task('serve', ['build', 'watch'], () => browserSyncInit())
 
 
 

@@ -1,44 +1,48 @@
 var gulp = require("gulp");
 var browserify = require("browserify");
 var source = require('vinyl-source-stream');
-var watchify = require("watchify");
 var tsify = require("tsify");
-var gutil = require("gulp-util");
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
+var buffer = require('vinyl-buffer');
 var paths = {
     pages: ['src/*.html']
 };
 
-// wraps browserify in watchify and cache the result
-var watchedBrowserify = watchify(
-   browserify({
+// copies html to dist
+gulp.task("copy-html", function () {
+    return gulp.src(paths.pages)
+        .pipe(gulp.dest("dist"));
+});
+
+
+// browserifies code
+gulp.task("browserify", function() {
+  var browserifyConfig = {
     basedir: '.',
     debug: true,
     entries: ['src/main.ts'],
     cache: {},
     packageCache: {}
-  }).plugin(tsify)
-);
+  };
 
-
-// copies html to /dist
-gulp.task("copy-html", function () {
-  return gulp.src(paths.pages)
-    .pipe(gulp.dest("dist"));
+  return browserify(browserifyConfig)
+  .plugin(tsify) // browserify plugin to compile typescript
+  .bundle()
+    .on('error', function (err) { console.error(err); })
+  .pipe(source('bundle.js')) // in memory bundled file
+  .pipe(buffer()) // need to buffer to be able to use other js plugins
+  .pipe(sourcemaps.init({loadMaps: true})) // this will start the creation of a separate sourcemap file as opposed to inline
+  .pipe(uglify())
+  .pipe(sourcemaps.write('./')) // the calls to buffer and sourcemaps exist to make sure sourcemaps keep working
+  .pipe(gulp.dest("dist"));
 });
 
-// crates a function that bundles the watched browserify
-// this function will be called by the watchfied browserify on 'update'
-// and by the default task (so we bundle when we run 'gulp' for the first time)
-function bundle() {
-  return watchedBrowserify
-    .bundle()
-    .pipe(source('bundle.js'))
-    .pipe(gulp.dest("dist"));
-}
+// default task--optionally we could pass the browserify task as a function to this task. i.e. gulp.task("default", ["copy-html"], function() { // task goes here } );
+gulp.task("default", ["copy-html", "browserify"]);
 
-gulp.task("default", ["copy-html"], bundle); // instead of registering the browserify task we call the 'bundle' function, which returns the watchified broweserify and bundles it
-watchedBrowserify.on("update", bundle); // Browserify will run the bundle function every time one of your TypeScript files changes
-watchedBrowserify.on("log", gutil.log); // log to the console
+
+
 
 
 

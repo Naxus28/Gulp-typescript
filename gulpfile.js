@@ -17,7 +17,7 @@ gulp.task("copy-html", function () {
 gulp.task("default", ["copy-html"], function () {
   return browserify({
     basedir: '.',
-    debug: true,
+    debug: true, // generates inline sourcemap in the bundle.js created below
     entries: ['src/main.ts'],
     cache: {},
     packageCache: {}

@@ -8,5 +8,3 @@ use `git branch` to see all branches while on this folder
 use `git chechout <branch>` to checkout to the branch you wish to seei
 
 
-
-

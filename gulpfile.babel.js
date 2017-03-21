@@ -12,21 +12,22 @@ const gulp = require("gulp");
           src : ['src/*.html']
         },
         ts: {
-          dist: 'dist/js',
-          src: 'src/main.ts'
+          dist: 'dist/*.js',
+          src: 'src/*.ts'
         }
       };
 
 // copies html to dist
-gulp.task('html', () => {
+gulp.task('copy-html', () => {
   return gulp.src(paths.html.src)
     .pipe(gulp.dest('dist'));
 });
 
 // injects script tag into HTML
 gulp.task('inject', ['browserify'], () => {
-  let injectOptions = { addRootSlash: false, ignorePath: './dist', relative: true };
-  let tsSource = gulp.src(paths.ts.dist, { read: false });
+  let injectOptions = { addRootSlash: false, ignorePath: '/dist' };
+
+  let tsSource = gulp.src(paths.ts.dist);
   let targetHtml = paths.html.dist;
 
   return gulp.src(targetHtml)
@@ -61,13 +62,12 @@ gulp.task('browserify', () => {
     .pipe(gulp.dest('dist'));
 });
 
-// watch
+// watch files for changes and runs tasks in sequence
 gulp.task('watch', () => {
-   console.log('paths.html.src: ', paths.html.src) 
-   console.log('paths.ts.src: ', paths.ts.src) 
-  gulp.watch(paths.html.src, () => runSequence('html', 'inject', 'reload'));
+  gulp.watch(paths.html.src, () => runSequence('copy-html', 'inject', 'reload'));
   gulp.watch(paths.ts.src, () => runSequence('browserify', 'reload'));
 });
+
 
 // reload server
 gulp.task('reload', () => browserSync.reload());
@@ -81,9 +81,10 @@ let browserSyncInit = () => {
   });
 };
 
-// default task--optionally we could pass the browserify task as a function to this task. i.e. gulp.task('default', ['copy-html'], function() { // task goes here } );
-gulp.task('build', ['html', 'browserify', 'inject']);
+// build task
+gulp.task('build', ['copy-html', 'browserify', 'inject']);
 
+// serve task
 gulp.task('serve', ['build', 'watch'], () => browserSyncInit())
 
 

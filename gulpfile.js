@@ -10,8 +10,8 @@ var paths = {
 
 // copies html to dist
 gulp.task("copy-html", function () {
-    return gulp.src(paths.pages)
-        .pipe(gulp.dest("dist"));
+  return gulp.src(paths.pages)
+    .pipe(gulp.dest("dist"));
 });
 
 

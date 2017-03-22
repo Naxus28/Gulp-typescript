@@ -1,3 +1,4 @@
+
 const gulp = require("gulp");
       plugins = require('gulp-load-plugins')(),
       browserify = require("browserify"),
@@ -86,10 +87,4 @@ gulp.task('build', ['copy-html', 'browserify', 'inject']);
 
 // serve task
 gulp.task('serve', ['build', 'watch'], () => browserSyncInit())
-
-
-
-
-
-
 
